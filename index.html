@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Birthday Surprise</title>
+
+<!-- Google Stylish Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Playfair+Display:wght@600&family=Great+Vibes&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+body{
+    overflow:hidden;
+    transition:background 2s ease-in-out;
+    font-family:"Poppins",sans-serif;
+}
+
+/* Cross */
+#cross{
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 40px;
+    z-index: 5000;
+    color: white;
+    font-family:"Playfair Display",serif;
+    font-weight: bold;
+    filter: drop-shadow(0 0 3px black);
+}
+
+/* Content Area */
+#content{
+    position:absolute;
+    width:100%;
+    height:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    text-align:center;
+    z-index: 20;
+}
+
+
+/* Stars */
+.star{
+    position: fixed;
+    width: 3px;
+    height: 3px;
+    background:white;
+    border-radius:50%;
+    animation: twinkle 2s infinite ease-in-out;
+    opacity: 0.7;
+}
+@keyframes twinkle{
+    0%{opacity:0.3;}
+    50%{opacity:1;}
+    100%{opacity:0.3;}
+}
+
+/* Moon */
+.moon{
+    position: fixed;
+    top: 40px;
+    right: 40px;
+    width: 90px;
+    height: 90px;
+    background: radial-gradient(circle,#ffffff,#cfcfcf);
+    border-radius: 50%;
+    box-shadow: 0 0 20px white;
+    z-index: 3;
+}
+
+/* Sun */
+.sun{
+    position: fixed;
+    top: 40px;
+    left: 40px;
+    width: 110px;
+    height: 110px;
+    background: radial-gradient(circle,#fffab3,#ffcd38,#ffae00);
+    border-radius:50%;
+    box-shadow:0 0 30px #ffd700;
+    z-index:3;
+}
+
+/* Butterflies */
+.butterfly{
+    position: fixed;
+    width:40px;
+    height:40px;
+    background-image:url("https://i.imgur.com/fyP1kzX.png");
+    background-size:cover;
+    animation: fly 6s linear infinite;
+}
+@keyframes fly{
+    from{transform: translateY(0) translateX(0);}
+    to{transform: translateY(-100vh) translateX(60vw);}
+}
+
+/* Falling Rose Petals */
+.petal{
+    position: fixed;
+    width: 30px;
+    height: 30px;
+    background-image:url("https://i.imgur.com/8eQXK0R.png");
+    background-size:cover;
+    animation: fallPetal 7s linear infinite;
+    opacity:0.9;
+}
+@keyframes fallPetal{
+    from{transform:translateY(-10vh);}
+    to{transform:translateY(120vh);}
+}
+
+/* Gold Text */
+.gold{
+    font-size:48px;
+    font-family:"Great Vibes",cursive;
+    background:linear-gradient(90deg,#FFD700,#FFF4A3,#FFD700);
+    background-size:200% auto;
+    color:transparent;
+    -webkit-background-clip:text;
+    animation: shimmer 3s linear infinite;
+}
+@keyframes shimmer{
+    0%{background-position:0%;}
+    100%{background-position:200%;}
+}
+
+/* Buttons */
+.btn{
+    margin-top:20px;
+    padding:12px 24px;
+    border:none;
+    border-radius:10px;
+    font-size:20px;
+    cursor:pointer;
+    font-weight:600;
+    background:#ff4d6d;
+    color:white;
+    font-family:"Poppins";
+    animation: appear 0.7s ease forwards;
+}
+@keyframes appear{
+    from{opacity:0; transform:scale(0.6);}
+    to{opacity:1; transform:scale(1);}
+}
+</style>
+</head>
+
+<body>
+
+<div id="cross">✝</div>
+<div id="content"></div>
+
+<script>
+const content = document.getElementById("content");
+const cross = document.getElementById("cross");
+
+/*-----------------------------------------
+    PHASE 1 — NIGHT SKY (7 seconds)
+-------------------------------------------*/
+function nightPhase(){
+    document.body.style.background = "#000814";
+
+    /* Moon */
+    let moon = document.createElement("div");
+    moon.className = "moon";
+    document.body.appendChild(moon);
+
+    /* Stars */
+    for(let i=0;i<60;i++){
+        let s=document.createElement("div");
+        s.className="star";
+        s.style.left=Math.random()*100+"vw";
+        s.style.top=Math.random()*100+"vh";
+        s.style.animationDelay=Math.random()*2+"s";
+        document.body.appendChild(s);
+    }
+
+    content.innerHTML = `
+        <h2 style="color:white; font-size:32px; font-family:'Playfair Display';">
+            A peaceful night begins...
+        </h2>
+    `;
+}
+
+/*-----------------------------------------
+    PHASE 2 — MORNING + SUN + GARDEN (9 sec)
+-------------------------------------------*/
+function dayPhase(){
+    document.body.innerHTML = "";  // clear everything
+    document.body.appendChild(cross);
+    document.body.appendChild(content);
+
+    document.body.style.background = "linear-gradient(#87CEEB,#E3F6FF)";
+
+    /* Sun */
+    let sun=document.createElement("div");
+    sun.className="sun";
+    document.body.appendChild(sun);
+
+    /* Butterflies */
+    for(let i=0;i<10;i++){
+        let b=document.createElement("div");
+        b.className="butterfly";
+        b.style.left=Math.random()*100+"vw";
+        b.style.bottom="-50px";
+        b.style.animationDelay=Math.random()*3+"s";
+        document.body.appendChild(b);
+    }
+
+    content.innerHTML = `
+        <h2 style="color:#003049; font-size:34px; font-family:'Playfair Display';">
+            A beautiful morning has arrived...
+        </h2>
+    `;
+}
+
+/*-----------------------------------------
+    PHASE 3 — BIRTHDAY NAME REVEAL (7 sec)
+-------------------------------------------*/
+function birthdayPhase(){
+    document.body.innerHTML = "";  
+    document.body.appendChild(cross);
+    document.body.appendChild(content);
+
+    document.body.style.background = "white";
+
+    /* Falling Rose Petals */
+    for(let i=0;i<30;i++){
+        let p=document.createElement("div");
+        p.className="petal";
+        p.style.left=Math.random()*100+"vw";
+        p.style.animationDelay=Math.random()*5+"s";
+        document.body.appendChild(p);
+    }
+
+    content.innerHTML = `
+        <div class="gold">Happy Birthday Rachael</div>
+        <button class="btn" id="surpriseBtn">Tap for Surprise</button>
+    `;
+
+    /* Button function */
+    document.getElementById("surpriseBtn").onclick = () => {
+        document.getElementById("surpriseBtn").style.display="none";
+        showVerse();
+    };
+}
+
+/*-----------------------------------------
+    SHOW BIBLE VERSE (After Surprise)
+-------------------------------------------*/
+function showVerse(){
+    content.innerHTML = `
+        <h2 style="font-family:'Playfair Display'; font-size:30px; color:#001233; padding:20px;">
+            “The Lord bless you and keep you;  
+            the Lord make His face shine upon you  
+            and be gracious to you.”  
+            <br>— Numbers 6:24-25
+        </h2>
+    `;
+}
+
+/*-----------------------------------------
+    TIMELINE
+-------------------------------------------*/
+nightPhase();
+setTimeout(dayPhase, 7000);
+setTimeout(birthdayPhase, 7000 + 9000);
+</script>
+
+</body>
+  </html>
