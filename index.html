@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Rachael — Birthday Surprise (Gold)</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@400;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --gold:#D9A94B;
+    --gold-deep:#b98b2e;
+    --cream:#FFF7EB;
+    --bg-night:#0b1020;
+    --bg-day:#fff5e6;
+    --card-bg: rgba(255,255,255,0.02);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: "Montserrat",system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    color:#111;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    overflow:hidden;
+    background: linear-gradient(180deg,var(--bg-night), #0b1230);
+    transition: background 1.2s ease-in-out;
+  }
+
+  /* Top cross */
+  #cross{
+    position:fixed;
+    top:18px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:1500;
+    font-size:42px;
+    color:var(--gold);
+    filter:drop-shadow(0 0 8px rgba(217,169,75,0.6));
+  }
+
+  /* main container */
+  .stage{
+    position:relative;
+    width:100%;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    padding:20px;
+    z-index:500;
+  }
+
+  /* content card (centers name & buttons) */
+  .card{
+    position:relative;
+    text-align:center;
+    background: transparent;
+    pointer-events:none;
+  }
+
+  #name{
+    pointer-events:auto;
+    display:inline-block;
+    color:var(--gold);
+    font-family:"Great Vibes",cursive;
+    font-size:clamp(36px,8vw,84px);
+    line-height:1;
+    letter-spacing:0.6px;
+    text-shadow:
+      0 1px 0 rgba(255,255,255,0.04),
+      0 6px 30px rgba(0,0,0,0.45),
+      0 0 14px rgba(217,169,75,0.25);
+    margin-bottom:14px;
+    pointer-events:none;
+  }
+
+  #subtitle{
+    font-family:"Playfair Display",serif;
+    color:#f9e9d6;
+    font-size:clamp(14px,2.2vw,20px);
+    margin-bottom:10px;
+    opacity:0.95;
+  }
+
+  /* Buttons (placed under name) */
+  .controls{
+    pointer-events:auto;
+    margin-top:8px;
+    display:flex;
+    gap:12px;
+    justify-content:center;
+  }
+  .btn{
+    appearance:none;
+    border:0;
+    padding:10px 16px;
+    border-radius:10px;
+    font-weight:600;
+    cursor:pointer;
+    box-shadow:0 6px 18px rgba(0,0,0,0.2);
+    transform-origin:center;
+    transition:transform .18s ease,opacity .25s ease;
+  }
+  .btn:active{ transform:translateY(1px) scale(.995) }
+  .btn--surprise{ background: linear-gradient(180deg,var(--gold), var(--gold-deep)); color:#2b1a08; display:none; }
+  .btn--verse{ background: #fff; color:var(--gold-deep); display:none; }
+
+  /* stars layer (night) */
+  #stars{
+    position:fixed; inset:0; z-index:40; pointer-events:none; overflow:hidden;
+  }
+  .star{
+    position:absolute;
+    width:3px;height:3px;background:rgba(255,255,255,0.95);border-radius:50%;
+    transform:translate(-50%,-50%);
+    opacity:0;
+    filter:drop-shadow(0 0 8px rgba(255,230,160,0.8));
+    will-change:opacity, transform;
+  }
+
+  /* sun & moon (SVG data used) */
+  #sun, #moon{
+    position:fixed;
+    top:24px; right:20px;
+    width:110px; height:110px;
+    z-index:200;
+    pointer-events:none;
+    transform-origin:center center;
+    transition:opacity 1s ease, transform 1s ease;
+    opacity:0;
+  }
+
+  /* falling elements (petals/rose/snow) */
+  .fall{
+    position:fixed;
+    width:28px; height:28px;
+    background-size:contain;
+    background-repeat:no-repeat;
+    z-index:120;
+    pointer-events:none;
+    will-change:transform,opacity;
+  }
+
+  /* butterflies */
+  .butterfly{
+    position:fixed;
+    width:48px;height:48px;
+    background-size:contain;background-repeat:no-repeat;
+    z-index:130;
+    pointer-events:none;
+    transform-origin:center center;
+    will-change:transform, left, top, opacity;
+  }
+
+  /* small helpers for mobile */
+  @media (max-width:520px){
+    #cross{ font-size:34px; top:12px; }
+    #sun,#moon{ width:86px;height:86px; right:14px; top:14px; }
+    #name{ font-size:clamp(32px,12vw,64px) }
+    .btn{ padding:10px 14px; font-size:15px; border-radius:8px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="cross">✝</div>
+
+<!-- visual layers -->
+<div id="stars" aria-hidden="true"></div>
+<img id="moon" alt="" />
+<img id="sun" alt="" />
+
+<!-- main stage -->
+<main class="stage" role="main" aria-live="polite">
+  <div class="card">
+    <div id="name" aria-hidden="false"></div>
+    <div id="subtitle" aria-hidden="true"></div>
+
+    <div class="controls">
+      <button id="surpriseBtn" class="btn btn--surprise" aria-label="Tap for Surprise">Tap for Surprise</button>
+      <button id="verseBtn" class="btn btn--verse" aria-label="Verse for you">Verse for You</button>
+    </div>
+  </div>
+</main>
+
+<script>
+/* -----------------------------
+   Inline SVG images (gold style)
+   Using data URLs so nothing 404s
+   -----------------------------*/
+const SVGs = {
+  sun: `data:image/svg+xml;utf8,
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+    <defs><filter id='g'><feGaussianBlur stdDeviation='1.2' result='b'/></filter></defs>
+    <circle cx='32' cy='32' r='12' fill='%23FFD36A'/>
+    <g stroke='%23F2B93E' stroke-width='2'>
+      <line x1='32' y1='2' x2='32' y2='12' stroke-linecap='round'/>
+      <line x1='32' y1='52' x2='32' y2='62' stroke-linecap='round'/>
+      <line x1='2' y1='32' x2='12' y2='32' stroke-linecap='round'/>
+      <line x1='52' y1='32' x2='62' y2='32' stroke-linecap='round'/>
+      <line x1='10' y1='10' x2='18' y2='18' stroke-linecap='round'/>
+      <line x1='46' y1='46' x2='54' y2='54' stroke-linecap='round'/>
+      <line x1='10' y1='54' x2='18' y2='46' stroke-linecap='round'/>
+      <line x1='46' y1='18' x2='54' y2='10' stroke-linecap='round'/>
+    </g>
+  </svg>`,
+
+  moon: `data:image/svg+xml;utf8,
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+    <defs><filter id='d'><feGaussianBlur stdDeviation='1.0' /></filter></defs>
+    <path d='M42 50c-10 0-18-8-18-18 0-7 4-13 10-16 0 0-2 9 5 13 7 4 13 9 13 21z' fill='%23FFF1D6' />
+    <circle cx='40' cy='18' r='1.6' fill='%23FFE9B8'/>
+  </svg>`,
+
+  butterfly: `data:image/svg+xml;utf8,
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+    <g transform='translate(2,2)'>
+      <path d='M8 20c6-8 18-8 18-8s2 8-4 14-20 6-18-6z' fill='%23EBC07A' stroke='%23C89B45' stroke-width='1'/>
+      <path d='M48 20c-6-8-18-8-18-8s-2 8 4 14 20 6 18-6z' fill='%23F6D88F' stroke='%23C89B45' stroke-width='1'/>
+      <ellipse cx='32' cy='30' rx='4' ry='6' fill='%23C07A2A'/>
+    </g>
+  </svg>`,
+
+  petal: `data:image/svg+xml;utf8,
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'>
+    <path d='M20 2c6 6 12 14 10 22s-14 12-20 6 2-20 10-28z' fill='%23FFD9B3' stroke='%23E6B87A' stroke-width='0.6'/>
+  </svg>`,
+
+  rose: `data:image/svg+xml;utf8,
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'>
+    <circle cx='20' cy='18' r='10' fill='%23F2C6A1'/>
+    <path d='M12 18c3-8 16-8 16 0s-6 8-8 8-7-6-8-8z' fill='%23EBA67A'/>
+  </svg>`
+};
+
+/* Attach images to DOM elements */
+const sunEl = document.getElementById('sun');
+const moonEl = document.getElementById('moon');
+sunEl.src = SVGs.sun;
+moonEl.src = SVGs.moon;
+
+/* basic references */
+const stage = document.querySelector('.stage');
+const nameEl = document.getElementById('name');
+const subtitle = document.getElementById('subtitle');
+const starsRoot = document.getElementById('stars');
+const surpriseBtn = document.getElementById('surpriseBtn');
+const verseBtn = document.getElementById('verseBtn');
+
+/* states & timings */
+const NIGHT_MS = 7000;
+const DAY_MS = 9000;
+const BIRTH_MS = 7000; // not auto-transitioning; we use button
+let activePhase = 'night';
+
+/* helper utilities */
+function rand(min, max){ return Math.random()*(max-min)+min; }
+function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
+
+/* ---------- STARS ---------- */
+function makeStars(count=60){
+  starsRoot.innerHTML = '';
+  for(let i=0;i<count;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = rand(2,98)+'%';
+    s.style.top  = rand(6,94)+'%';
+    s.style.opacity = 0;
+    const dur = rand(1.2,2.6);
+    s.animate([
+      { opacity: 0, transform: 'scale(.6)'},
+      { opacity: rand(0.5,1), transform: 'scale(1.2)'},
+      { opacity: 0, transform: 'scale(.8)'}
+    ], { duration: dur*1000, iterations: Infinity, direction:'alternate', easing:'ease-in-out', delay: rand(0,2000) });
+    starsRoot.appendChild(s);
+  }
+}
+
+/* ---------- FALLING (petals/roses/snow) ---------- */
+const fallingPool = new Set();
+function spawnFall(svgDataUrl, count = 18, size = 26, speedRange = [0.6,1.8], layerZ = 120){
+  // create multiple falling items; they reuse requestAnimationFrame loops
+  for(let i=0;i<count;i++){
+    const el = document.createElement('div');
+    el.className = 'fall';
+    el.style.width = size+'px';
+    el.style.height = size+'px';
+    el.style.left = rand(-10,110)+'%';
+    el.style.top = rand(-110,-10)+'px';
+    el.style.backgroundImage = `url("${svgDataUrl}")`;
+    el.style.zIndex = layerZ;
+    el.style.opacity = rand(0.8,1);
+    const vx = rand(-0.2,0.6); // horizontal drift
+    const speed = rand(speedRange[0], speedRange[1]);
+    const rotSpeed = rand(-2,2);
+    let rot = rand(0,360);
+    let y = parseFloat(el.style.top);
+    document.body.appendChild(el);
+    const obj = { el, vx, speed, rotSpeed, rot, y };
+    fallingPool.add(obj);
+  }
+}
+
+/* Animate falling pool (single RAF loop) */
+let fallingRAF = null;
+function startFalling(){
+  if(fallingRAF) return;
+  function step(){
+    for(const obj of Array.from(fallingPool)){
+      obj.y += obj.speed;
+      obj.el.style.top = obj.y + 'px';
+      // sway horizontally
+      const leftPct = parseFloat(obj.el.style.left);
+      const sway = Math.sin((Date.now()/1000)*0.8 + obj.rot)*8;
+      obj.el.style.left = clamp(leftPct + obj.vx, -20, 120) + '%';
+      obj.rot += obj.rotSpeed;
+      obj.el.style.transform = `rotate(${obj.rot}deg)`;
+      // recycle
+      if(obj.y > window.innerHeight + 40){
+        obj.y = rand(-180, -20);
+        obj.el.style.left = rand(-10,110)+'%';
+      }
+    }
+    fallingRAF = requestAnimationFrame(step);
+  }
+  fallingRAF = requestAnimationFrame(step);
+}
+function stopFalling(){
+  if(fallingRAF) cancelAnimationFrame(fallingRAF);
+  fallingRAF = null;
+  // clear DOM
+  for(const obj of Array.from(fallingPool)){
+    obj.el.remove();
+    fallingPool.delete(obj);
+  }
+}
+
+/* ---------- BUTTERFLIES ---------- */
+/* Each butterfly is an absolutely-positioned element with data URL SVG background */
+function createButterfly(x,y,scale=1, lifetime=5000){
+  const b = document.createElement('div');
+  b.className = 'butterfly';
+  b.style.left = x + 'px';
+  b.style.top  = y + 'px';
+  b.style.opacity = 1;
+  b.style.transform = `scale(${scale})`;
+  b.style.backgroundImage = `url("${SVGs.butterfly}")`;
+  document.body.appendChild(b);
+  return b;
+}
+
+/* fly along easing bezier path (simple approximation) */
+function flyButterfly(b, path, duration = 3500, rotate=true){
+  const start = performance.now();
+  function ease(t){ return (--t)*t*t+1 } // easeOutCubic
+  function step(now){
+    const t = clamp((now - start)/duration, 0, 1);
+    const e = ease(t);
+    // cubic bezier interpolation using 4 control points
+    function lerp(a,b,u){ return a + (b-a)*u }
+    const x = cubic(path[0].x, path[1].x, path[2].x, path[3].x, e);
+    const y = cubic(path[0].y, path[1].y, path[2].y, path[3].y, e);
+    b.style.left = x + 'px';
+    b.style.top  = y + 'px';
+    if(rotate){
+      const angle = Math.atan2(y - (path[0].y), x - (path[0].x)) * 180 / Math.PI;
+      b.style.transform = `rotate(${angle+10}deg) scale(${1 - 0.25*e})`;
+    }
+    if(t < 1) requestAnimationFrame(step);
+    else {
+      // gently fade away and remove
+      b.animate([{opacity:1},{opacity:0}],{duration:600,fill:'forwards'}).onfinish = ()=> b.remove();
+    }
+  }
+  requestAnimationFrame(step);
+  function cubic(a,b,c,d,t){
+    // cubic bezier eval (de Casteljau)
+    const ab = lerp(a,b,t), bc = lerp(b,c,t), cd = lerp(c,d,t);
+    const abc = lerp(ab,bc,t), bcd = lerp(bc,cd,t);
+    return lerp(abc,bcd,t);
+  }
+}
+
+/* reveal name: create letters then spawn butterflies that fly upward away from letter */
+async function revealNameWithButterflies(name){
+  nameEl.innerHTML = '';
+  const letters = Array.from(name);
+  const spanNodes = [];
+  letters.forEach(ch=>{
+    const sp = document.createElement('span');
+    sp.textContent = ch;
+    sp.style.opacity = 0;
+    sp.style.display = 'inline-block';
+    sp.style.margin = '0 2px';
+    sp.style.willChange = 'opacity, transform';
+    sp.style.pointerEvents = 'none';
+    nameEl.appendChild(sp);
+    spanNodes.push(sp);
+  });
+
+  // fade letters in one by one and send butterflies
+  for(let i=0;i<spanNodes.length;i++){
+    const sp = spanNodes[i];
+    // fade letter in
+    sp.animate([{opacity:0, transform:'translateY(8px)'}, {opacity:1, transform:'translateY(0)'}], {duration:420, easing:'cubic-bezier(.22,.9,.35,1)'});
+    sp.style.opacity = 1;
+
+    // determine letter center
+    await new Promise(r => setTimeout(r, 160)); // slight delay
+
+    const rect = sp.getBoundingClientRect();
+    const startX = rect.left + rect.width/2;
+    const startY = rect.top + rect.height/2;
+
+    // Spawn 1-2 butterflies per letter to fly up and reveal (gold color)
+    const bCount = (i === 0 ? 2 : 1);
+    for(let b=0;b<bCount;b++){
+      const bf = createButterfly(startX, startY, clamp(0.9 + Math.random()*0.5, 0.8, 1.3));
+      // build a curvy bezier path upward-right or upward-left
+      const dir = (Math.random() > 0.5) ? 1 : -1;
+      const spread = 60 + Math.random()*120;
+      const hx = startX + dir * spread;
+      const hy = startY - (120 + Math.random()*80);
+      const cx2 = hx + (dir*60) * (Math.random()*0.7);
+      const cy2 = hy - (20 + Math.random()*80);
+      const path = [
+        {x: startX, y: startY},
+        {x: startX + dir*20, y: startY - 40},
+        {x: hx, y: hy},
+        {x: cx2, y: cy2}
+      ];
+      flyButterfly(bf, path, 2400 + Math.random()*1600);
+    }
+  }
+}
+
+/* ---------- PHASES ---------- */
+function setNight(){
+  activePhase = 'night';
+  document.body.style.background = `radial-gradient(1200px 600px at 10% 10%, rgba(14,12,30,1), rgba(10,7,30,1) 30%, rgba(5,7,20,1))`;
+  subtitle.textContent = '✨ A blessed night under the moon ✨';
+  subtitle.style.color = '#F6E2BF';
+  // moon visible, sun hidden
+  moonEl.style.opacity = 1;
+  moonEl.style.transform = 'translateY(0) scale(1)';
+  sunEl.style.opacity = 0;
+  // stars
+  makeStars();
+  // clear falls & stop previous
+  stopFalling();
+}
+
+function setDay(){
+  activePhase = 'day';
+  document.body.style.background = `linear-gradient(180deg, #fff8ee, #fff2de 40%, #ffeccd 100%)`;
+  subtitle.textContent = '🌞 A beautiful new day 🌞';
+  subtitle.style.color = '#7a4f10';
+  moonEl.style.opacity = 0;
+  sunEl.style.opacity = 1;
+  sunEl.style.transform = 'translateY(0) scale(1)';
+  // stop stars
+  starsRoot.innerHTML = '';
+  stopFalling();
+}
+
+function setBirthday(){
+  activePhase = 'birthday';
+  document.body.style.background = `linear-gradient(180deg, #fffaf3, #fff2e6)`;
+  subtitle.textContent = '';
+  subtitle.style.color = '#7a4f10';
+  // Show name and reveal with butterflies
+  revealNameWithButterflies('Rachael');
+
+  // spawn petals & roses (parallax layers)
+  spawnFall(SVGs.petal, 26, 26, [0.5,1.2], 120);
+  spawnFall(SVGs.rose, 16, 30, [0.6,1.6], 121);
+  startFalling();
+
+  // show surprise button (under the name)
+  setTimeout(()=>{
+    surpriseBtn.style.display = 'inline-block';
+    surpriseBtn.style.opacity = 1;
+    // ensure it's placed in flow (we've used a centered layout)
+    surpriseBtn.scrollIntoView({behavior:'smooth', block:'center'});
+  }, 1400);
+}
+
+function setFinal(){
+  activePhase = 'final';
+  document.body.style.background = `linear-gradient(180deg,#021028,#00244a)`;
+  subtitle.textContent = '';
+  // stop petals, spawn gentle snow
+  stopFalling();
+  spawnFall(SVGs.petal, 0); // clear
+  spawnFall(SVGs.petal, 0);
+  spawnFall(SVGs.rose, 0);
+  spawnFall(SVGs.petal, 0);
+  spawnFall(SVGs.petal, 0);
+  spawnFall(SVGs.petal, 0);
+  spawnFall(SVGs.petal, 0);
+  spawnFall(SVGs.petal, 0);
+
+  // small golden text
+  nameEl.innerHTML = `<span style="font-family:Playfair Display,serif;font-size:clamp(16px,3vw,28px);color:var(--gold);">You are the rhythm to my heartbeat, the blessing my prayers found.</span>`;
+  // spawn little snow-flakes (use petal svg but white small)
+  spawnFall(SVGs.petal, 40, 12, [0.8,2.2], 120);
+  startFalling();
+
+  // show verse button
+  setTimeout(()=>{
+    verseBtn.style.display = 'inline-block';
+  },600);
+}
+
+/* ---------- small helpers ---------- */
+function makeStars(){
+  starsRoot.innerHTML = '';
+  // create 50-90 stars (less on small screens)
+  const count = window.innerWidth < 520 ? 36 : 72;
+  for(let i=0;i<count;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = rand(2,98)+'%';
+    s.style.top = rand(3,94)+'%';
+    const delay = rand(0,2500);
+    const dur = rand(900,2400);
+    s.style.opacity = 0;
+    starsRoot.appendChild(s);
+    // simple twinkle using Web Animations API
+    s.animate([
+      { opacity: 0 },
+      { opacity: rand(0.45, 1) },
+      { opacity: 0 }
+    ], { duration: dur, iterations: Infinity, easing: 'ease-in-out', delay });
+  }
+}
+
+/* ---------- INIT ---------- */
+/* place initial invisible ui */
+nameEl.textContent = '';
+subtitle.textContent = '';
+surpriseBtn.style.display = 'none';
+verseBtn.style.display = 'none';
+
+/* wire buttons */
+surpriseBtn.addEventListener('click', ()=> {
+  surpriseBtn.style.display = 'none';
+  // final phase
+  setFinal();
+});
+
+verseBtn.addEventListener('click', ()=> {
+  verseBtn.style.display = 'none';
+  nameEl.innerHTML = `<div style="font-family:Playfair Display, serif; font-size:clamp(14px,3vw,20px); color:#FFF4D9; padding:6px 14px; max-width:92vw; margin:0 auto;">
+    “Charm is deceptive, and beauty is fleeting; but a woman who fears the Lord is to be praised.” — <strong>Proverbs 31:30</strong>
+  </div>`;
+});
+
+/* Sun / Moon elements (we already set src above) */
+const moonElm = document.getElementById('moon');
+const sunElm = document.getElementById('sun');
+const moonEl2 = moonEl; // alias
+const sunEl = sunEl;
+
+/* Show appropriate images by setting src on the DOM nodes created earlier */
+moonEl.src = SVGs.moon;
+sunEl.src  = SVGs.sun;
+
+/* Start sequence: night -> day -> birthday */
+setNight();
+setTimeout(()=>{
+  setDay();
+  setTimeout(()=>{
+    setBirthday();
+  }, DAY_MS);
+}, NIGHT_MS);
+
+</script>
+</body>
+  </html>
